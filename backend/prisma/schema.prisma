@@ -1,0 +1,87 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MeasurementUnit {
+  CUBIC_METER
+  SQUARE_METER
+  LINEAR_METER
+  TON
+  PIECE
+  HOUR
+}
+
+enum UserRole {
+  ADMIN
+  FOREMAN
+}
+
+model User {
+  id           String   @id @default(uuid())
+  login        String   @unique
+  passwordHash String
+  fullName     String
+  role         UserRole @default(FOREMAN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workLogs WorkLog[] @relation("CreatedBy")
+
+  @@map("users")
+}
+
+model WorkType {
+  id        String          @id @default(uuid())
+  name      String
+  unit      MeasurementUnit
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  workLogs WorkLog[]
+
+  @@unique([name])
+  @@map("work_types")
+}
+
+model Worker {
+  id        String   @id @default(uuid())
+  fullName  String
+  brigade   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workLogs WorkLog[]
+
+  @@map("workers")
+}
+
+model WorkLog {
+  id          String   @id @default(uuid())
+  performedAt DateTime @db.Date
+  workTypeId  String
+  volume      Decimal  @db.Decimal(12, 3)
+  workerId    String
+  note        String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  workType  WorkType @relation(fields: [workTypeId], references: [id], onDelete: Restrict)
+  worker    Worker   @relation(fields: [workerId], references: [id], onDelete: Restrict)
+  createdBy User     @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([performedAt])
+  @@index([deletedAt])
+  @@index([workTypeId])
+  @@index([workerId])
+  @@map("work_logs")
+}

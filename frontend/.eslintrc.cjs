@@ -1,0 +1,77 @@
+module.exports = {
+  root: true,
+  env: { browser: true, es2022: true, node: true },
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: './tsconfig.app.json',
+    tsconfigRootDir: __dirname,
+  },
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'react-refresh', 'import', 'boundaries'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended',
+    'plugin:import/recommended',
+    'plugin:import/typescript',
+    'plugin:boundaries/recommended',
+    'prettier',
+  ],
+  settings: {
+    react: { version: 'detect' },
+    'import/resolver': {
+      typescript: { project: './tsconfig.app.json' },
+      node: true,
+    },
+    'boundaries/elements': [
+      { type: 'app', pattern: 'src/app/*' },
+      { type: 'pages', pattern: 'src/pages/*' },
+      { type: 'widgets', pattern: 'src/widgets/*' },
+      { type: 'features', pattern: 'src/features/*' },
+      { type: 'entities', pattern: 'src/entities/*' },
+      { type: 'shared', pattern: 'src/shared/*' },
+    ],
+    'boundaries/include': ['src/**/*'],
+  },
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/consistent-type-imports': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    'react/prop-types': 'off',
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        pathGroups: [{ pattern: '@/**', group: 'internal', position: 'after' }],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
+    'import/no-named-as-default-member': 'off',
+    'boundaries/element-types': [
+      'error',
+      {
+        default: 'disallow',
+        rules: [
+          { from: 'app', allow: ['pages', 'widgets', 'features', 'entities', 'shared'] },
+          { from: 'pages', allow: ['widgets', 'features', 'entities', 'shared'] },
+          { from: 'widgets', allow: ['widgets', 'features', 'entities', 'shared'] },
+          { from: 'features', allow: ['entities', 'shared'] },
+          { from: 'entities', allow: ['shared'] },
+          { from: 'shared', allow: ['shared'] },
+        ],
+      },
+    ],
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    eqeqeq: ['error', 'always'],
+    'prefer-const': 'error',
+  },
+  ignorePatterns: ['dist', 'build', 'node_modules', 'coverage', '*.gen.ts', '*.config.ts', '*.config.cjs'],
+};
